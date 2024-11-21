@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Authentication</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body>
+    <h1>Scan the QR Code to Access the Website</h1>
+
+    <!-- QR code container -->
+    <div id="qrcode"></div>
+
+    <!-- Input field for user to manually enter scanned code -->
+    <input type="text" id="scannedCode" placeholder="Enter Scanned Code">
+    <button onclick="validateQR()">Submit</button>
+
+    <script>
+        // Predefined unique QR code value
+        var uniqueCode = "12345";
+
+        // Generate the QR code dynamically
+        QRCode.toCanvas(document.getElementById('qrcode'), uniqueCode, function (error) {
+            if (error) console.error(error);
+            console.log('QR Code generated!');
+        });
+
+        // Validate the QR code entered by the user
+        function validateQR() {
+            var userInput = document.getElementById('scannedCode').value;
+
+            // Send the scanned code to the backend for validation
+            fetch('http://localhost:3000/validate-code', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ code: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Access Granted') {
+                    alert("Access Granted!");
+                    window.location.href = "secure-page.html";  // Redirect to the secured page
+                } else {
+                    alert("Invalid QR Code. Access Denied.");
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
